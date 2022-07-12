@@ -812,3 +812,31 @@ class SecondVC: UIViewController {
 		])
 	}
 }
+
+class MyTabBarController: UITabBarController {
+
+	var changingTabs: Bool = false
+	
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		//delegate = self
+	}
+
+	override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+		print(#function, selectedIndex, item)
+		if let idx = tabBar.items?.firstIndex(of: item) {
+			if idx == selectedIndex {
+				print("same tab")
+				if let vc = self.viewControllers?[selectedIndex] as? HasScrollVC {
+					vc.scrollToTop()
+				}
+			}
+		}
+	}
+	
+}
+class HasScrollVC: UIViewController {
+	func scrollToTop() {
+		print(#function)
+	}
+}
