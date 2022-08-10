@@ -840,3 +840,84 @@ class HasScrollVC: UIViewController {
 		print(#function)
 	}
 }
+
+protocol FirstTabDelegate: NSObject {
+	func someDelegateFunctionInFirst(_ str: String)
+}
+protocol SecondTabDelegate: NSObject {
+	func someDelegateFunctionInSecond(_ str: String)
+}
+class MyCustomTabBarController: UITabBarController, UITabBarControllerDelegate {
+	
+	weak var firstDelegate: FirstTabDelegate?
+	weak var secondDelegate: SecondTabDelegate?
+
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		delegate = self
+	}
+
+	// this is called *when* the tab item is selected (tapped)
+	override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+
+		firstDelegate?.someDelegateFunctionInFirst("Delegate item")
+		secondDelegate?.someDelegateFunctionInSecond("Delegate item")
+		
+		guard let theItems = self.tabBar.items,
+			  let idx = theItems.firstIndex(of: item),
+			  let controllers = self.viewControllers
+		else { return }
+		
+		if let vc = controllers[idx] as? FirstTabVC {
+			vc.someFunctionInFirst("From didSelect item")
+		}
+		if let vc = controllers[idx] as? SecondTabVC {
+			vc.someFunctionInSecond("From didSelect item")
+		}
+
+	}
+
+	// this is called when the tab's ViewController is selected (*after* the tab item is selected (tapped))
+	func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+		
+		firstDelegate?.someDelegateFunctionInFirst("Delegate select")
+		secondDelegate?.someDelegateFunctionInSecond("Delegate select")
+		
+		if let vc = viewController as? FirstTabVC {
+			vc.someFunctionInFirst("From didSelect viewController")
+		}
+		if let vc = viewController as? SecondTabVC {
+			vc.someFunctionInSecond("From didSelect viewController")
+		}
+	}
+	
+}
+
+class FirstTabVC: UIViewController, FirstTabDelegate {
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		if let tbc = self.tabBarController as? MyCustomTabBarController {
+			tbc.firstDelegate = self
+		}
+	}
+	public func someFunctionInFirst(_ str: String) {
+		print("In First Tab VC: ", str)
+	}
+	func someDelegateFunctionInFirst(_ str: String) {
+		print("In First Tab VC delegate: ", str)
+	}
+}
+class SecondTabVC: UIViewController, SecondTabDelegate {
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		if let tbc = self.tabBarController as? MyCustomTabBarController {
+			tbc.secondDelegate = self
+		}
+	}
+	public func someFunctionInSecond(_ str: String) {
+		print("In Second Tab VC: ", str)
+	}
+	func someDelegateFunctionInSecond(_ str: String) {
+		print("In Second Tab VC delegate: ", str)
+	}
+}
